@@ -1,0 +1,79 @@
+SSB-BACKEND/
+│
+├── server.js                 # Entry point
+├── .env                      # Environment variables
+├── package.json
+│
+├── config/
+│   ├── database.js          # MySQL connection config
+│   ├── jwt.js               # JWT config
+│   └── socketio.js          # Socket.IO config
+│
+├── middleware/
+│   ├── auth.js              # JWT authentication
+│   ├── errorHandler.js      # Error handling
+│   ├── validation.js        # Request validation
+│   └── roleCheck.js         # Role-based access control
+│
+├── models/
+│   ├── User.js              # User model
+│   ├── Driver.js            # Driver model
+│   ├── Bus.js               # Bus model
+│   ├── Route.js             # Route model
+│   ├── Student.js           # Student model
+│   ├── Schedule.js          # Schedule model
+│   ├── Tracking.js          # GPS Tracking model
+│   ├── Notification.js      # Notification model
+│   ├── Message.js           # Message model
+│   └── Incident.js          # Incident model
+│
+├── controllers/
+│   ├── authController.js    # Authentication logic
+│   ├── userController.js    # User CRUD
+│   ├── driverController.js  # Driver management
+│   ├── busController.js     # Bus management
+│   ├── routeController.js   # Route management
+│   ├── studentController.js # Student management
+│   ├── scheduleController.js # Schedule management
+│   ├── trackingController.js # GPS tracking
+│   ├── notificationController.js
+│   ├── messageController.js
+│   ├── incidentController.js
+│   └── dashboardController.js
+│
+├── routes/
+│   ├── index.js             # Main router
+│   ├── auth.js              # Auth routes
+│   ├── users.js             # User routes
+│   ├── drivers.js           # Driver routes
+│   ├── buses.js             # Bus routes
+│   ├── routes.js            # Route routes
+│   ├── students.js          # Student routes
+│   ├── schedules.js         # Schedule routes
+│   ├── tracking.js          # Tracking routes
+│   ├── notifications.js     # Notification routes
+│   ├── messages.js          # Message routes
+│   ├── incidents.js         # Incident routes
+│   └── dashboard.js         # Dashboard routes
+│
+├── services/
+│   ├── emailService.js      # Email notifications
+│   ├── smsService.js        # SMS notifications (optional)
+│   ├── gpsService.js        # GPS calculation utilities
+│   └── notificationService.js # Push notifications
+│
+├── utils/
+│   ├── validators.js        # Input validators
+│   ├── helpers.js           # Helper functions
+│   ├── constants.js         # Constants
+│   └── errors.js            # Custom error classes
+│
+├── socket/
+│   ├── index.js             # Socket.IO setup
+│   ├── trackingSocket.js    # Real-time tracking handlers
+│   └── notificationSocket.js # Real-time notifications
+│
+└── tests/                   # API tests (optional)
+    ├── auth.test.js
+    ├── bus.test.js
+    └── ...
