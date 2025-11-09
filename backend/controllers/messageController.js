@@ -161,6 +161,19 @@ const getContacts = async (req, res, next) => {
   }
 };
 
+const markConversationAsRead = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const otherUserId = parseInt(req.params.otherUserId);
+
+    await Message.markConversationAsRead(userId, otherUserId);
+
+    sendSuccess(res, null, 'Đã đánh dấu cuộc trò chuyện là đã đọc');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getInbox,
   getSent,
@@ -170,5 +183,6 @@ module.exports = {
   markAsRead,
   deleteMessage,
   getConversation,
-  getContacts
+  getContacts,
+  markConversationAsRead
 };

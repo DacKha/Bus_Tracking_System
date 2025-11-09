@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import { Play, Square, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface Schedule {
@@ -31,30 +32,20 @@ const ScheduleStatusControl: React.FC<ScheduleStatusControlProps> = ({
       setLoading(true);
       setError('');
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/schedules/${schedule.schedule_id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: newStatus })
+      const response = await api.put(`/api/schedules/${schedule.schedule_id}/status`, {
+        status: newStatus
       });
 
-      if (response.ok) {
-        // Emit Socket.IO event
+      if (response.data) {
         if (connected) {
           sendScheduleStatusUpdate(schedule.schedule_id, newStatus);
         }
 
         onStatusUpdate();
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Không thể cập nhật trạng thái');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating status:', err);
-      setError('Có lỗi xảy ra khi cập nhật trạng thái');
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật trạng thái');
     } finally {
       setLoading(false);
     }

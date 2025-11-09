@@ -9,7 +9,8 @@ const {
   markAsRead,
   deleteMessage,
   getConversation,
-  getContacts
+  getContacts,
+  markConversationAsRead
 } = require('../controllers/messageController');
 const { protect } = require('../middleware/auth');
 
@@ -50,6 +51,13 @@ router.post('/', sendMessage);
  * @access  Private
  */
 router.get('/conversation/:otherUserId', getConversation);
+
+/**
+ * @route   PUT /api/messages/conversation/:otherUserId/read
+ * @desc    Mark conversation as read
+ * @access  Private
+ */
+router.put('/conversation/:otherUserId/read', markConversationAsRead);
 
 /**
  * @route   POST /api/messages/:parentMessageId/reply

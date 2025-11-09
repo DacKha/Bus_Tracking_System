@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-// Custom hook de ket noi Socket.IO va quan ly real-time events
+// Custom hook để kết nối Socket.IO và quản lý real-time events
 export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    // Tao ket noi Socket.IO
+    // Tạo kết nối Socket.IO
     const socketIo = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
       reconnection: true,
       reconnectionDelay: 1000,
@@ -14,19 +14,19 @@ export const useSocket = () => {
       reconnectionAttempts: 5
     });
 
-    // Ket noi thanh cong
+    // Kết nối thành công
     socketIo.on('connect', () => {
-      console.log('Socket.IO da ket noi');
+      console.log('Socket.IO đã kết nối');
     });
 
-    // Loi ket noi
+    // Lỗi kết nối
     socketIo.on('error', (error) => {
-      console.error('Loi Socket.IO:', error);
+      console.error('Lỗi Socket.IO:', error);
     });
 
-    // Ngat ket noi
+    // Ngắt kết nối
     socketIo.on('disconnect', () => {
-      console.log('Socket.IO da ngat ket noi');
+      console.log('Socket.IO đã ngắt kết nối');
     });
 
     setSocket(socketIo);

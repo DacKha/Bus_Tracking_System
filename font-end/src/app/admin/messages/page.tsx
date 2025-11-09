@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import ConversationList from '@/components/ConversationList';
 import MessageInput from '@/components/MessageInput';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import { MessageSquare, Users } from 'lucide-react';
 
 interface Message {
@@ -76,14 +77,8 @@ function MessagesContent() {
 
   const fetchContacts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/messages/contacts', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setContacts(data.data || data);
-      }
+      const res = await api.get('/api/messages/contacts');
+      setContacts(res.data.data || res.data || []);
     } catch (err) {
       console.error('Failed to load contacts', err);
     }
@@ -92,14 +87,8 @@ function MessagesContent() {
   const fetchConversation = async (otherUserId: number) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/messages/conversation/${otherUserId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.data || data);
-      }
+      const res = await api.get(`/api/messages/conversation/${otherUserId}`);
+      setMessages(res.data.data || res.data || []);
     } catch (err) {
       console.error('Failed to load conversation', err);
     } finally {
@@ -129,14 +118,10 @@ function MessagesContent() {
 
   const markConversationRead = async (otherUserId: number) => {
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`http://localhost:5000/api/messages/${otherUserId}/read`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.put(`/api/messages/conversation/${otherUserId}/read`);
       fetchContacts();
     } catch (err) {
-      // ignore
+      console.error('Failed to mark as read', err);
     }
   };
 

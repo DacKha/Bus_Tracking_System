@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { driverService } from '@/lib/driverService';
+import api from '@/lib/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { LoadingOverlay } from '@/components/Loading';
 import AttendanceTracker from '@/components/AttendanceTracker';
@@ -100,17 +101,8 @@ function DriverAttendanceContent() {
   const selectSchedule = async (schedule: Schedule) => {
     setSelectedSchedule(schedule);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/schedules/${schedule.schedule_id}/attendance`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setStudents(result.data || []);
-      }
+      const response = await api.get(`/api/schedules/${schedule.schedule_id}/attendance`);
+      setStudents(response.data.data || []);
     } catch (err) {
       console.error('Error loading students:', err);
     }

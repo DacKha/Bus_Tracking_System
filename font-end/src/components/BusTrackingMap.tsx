@@ -36,11 +36,9 @@ const BusTrackingMap: React.FC<BusTrackingMapProps> = ({
   useEffect(() => {
     if (!connected || !scheduleId) return;
 
-    // Join schedule room to receive updates
     joinSchedule(scheduleId);
 
-    // Listen for location updates
-    onLocationUpdate((data) => {
+    const unsubscribe = onLocationUpdate((data) => {
       if (data.schedule_id === scheduleId) {
         setLocation({
           latitude: data.latitude,
@@ -55,7 +53,6 @@ const BusTrackingMap: React.FC<BusTrackingMapProps> = ({
       }
     });
 
-    // Timeout if no location received after 30 seconds
     const timeout = setTimeout(() => {
       if (!location) {
         setError('Không nhận được vị trí xe buýt. Có thể xe chưa khởi hành.');
@@ -66,8 +63,11 @@ const BusTrackingMap: React.FC<BusTrackingMapProps> = ({
     return () => {
       leaveSchedule(scheduleId);
       clearTimeout(timeout);
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
-  }, [scheduleId, connected, joinSchedule, leaveSchedule, onLocationUpdate, location]);
+  }, [scheduleId, connected, joinSchedule, leaveSchedule, onLocationUpdate]);
 
   // Format timestamp
   const formatTime = (timestamp: string) => {

@@ -2,6 +2,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
 import Link from 'next/link';
 import {
   Home,
@@ -27,13 +28,13 @@ export default function ParentLayout({
   };
 
   const navItems = [
-    { href: '/parents/home', label: 'Trang chu', icon: Home },
-    { href: '/parents/tracking', label: 'Theo doi', icon: MapPin },
-    { href: '/parents/schedule', label: 'Lich trinh', icon: Calendar },
-    { href: '/parents/notifications', label: 'Thong bao', icon: Bell },
-    { href: '/parents/messages', label: 'Tin nhan', icon: MessageSquare },
-    { href: '/parents/incident', label: 'Su co', icon: AlertTriangle },
-    { href: '/parents/settings', label: 'Cai dat', icon: Settings },
+    { href: '/parents/home', label: 'Trang chủ', icon: Home },
+    { href: '/parents/tracking', label: 'Theo dõi', icon: MapPin },
+    { href: '/parents/schedule', label: 'Lịch trình', icon: Calendar },
+    { href: '/parents/notifications', label: 'Thông báo', icon: Bell },
+    { href: '/parents/messages', label: 'Tin nhắn', icon: MessageSquare },
+    { href: '/parents/incident', label: 'Sự cố', icon: AlertTriangle },
+    { href: '/parents/settings', label: 'Cài đặt', icon: Settings },
   ];
 
   return (
@@ -47,11 +48,13 @@ export default function ParentLayout({
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-gray-900">Smart School Bus</h1>
-                <p className="text-xs text-gray-500">Phu huynh</p>
+                <p className="text-xs text-gray-500">Phụ huynh</p>
               </div>
             </Link>
 
             <div className="flex items-center gap-4">
+              <NotificationBell />
+              
               <div className="hidden sm:flex flex-col items-end">
                 <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
@@ -62,7 +65,7 @@ export default function ParentLayout({
                 className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
               >
                 <LogOut size={16} />
-                <span className="hidden sm:inline">Dang xuat</span>
+                <span className="hidden sm:inline">Đăng xuất</span>
               </button>
             </div>
           </div>

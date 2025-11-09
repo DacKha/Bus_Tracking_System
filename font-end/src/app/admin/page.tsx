@@ -110,7 +110,7 @@ function DashboardContent() {
     if (user && token) {
       loadDashboard();
     }
-  }, [token]);
+  }, [user, token]);
 
   // Handle schedule click
   const handleScheduleClick = (schedule: Schedule) => {

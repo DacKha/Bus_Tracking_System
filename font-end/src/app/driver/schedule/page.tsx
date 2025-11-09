@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import ScheduleStatusControl from '@/components/ScheduleStatusControl';
 import { Calendar, Clock, MapPin, Users, Bus, AlertCircle } from 'lucide-react';
 
@@ -42,22 +43,15 @@ const DriverSchedulePage: React.FC = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const today = new Date().toISOString().split('T')[0];
 
-      const response = await fetch(`http://localhost:5000/api/schedules?date=${today}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get(`/api/schedules?date=${today}`);
 
-      if (response.ok) {
-        const data = await response.json();
-        setSchedules(data.data || []);
+      if (response.data) {
+        setSchedules(response.data.data || []);
         
-        // Auto-select first schedule if none selected
-        if (!selectedSchedule && data.data && data.data.length > 0) {
-          setSelectedSchedule(data.data[0]);
+        if (!selectedSchedule && response.data.data && response.data.data.length > 0) {
+          setSelectedSchedule(response.data.data[0]);
         }
       } else {
         setError('Không thể tải lịch trình');

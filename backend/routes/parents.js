@@ -55,4 +55,7 @@ router.get('/me/schedules/history', protect, authorize('parent'), getScheduleHis
 // Admin xem danh sách con của 1 parent
 router.get('/:id/students', protect, authorize('admin'), getParentStudents);
 
+// Lấy thông tin parent theo user_id
+router.get('/user/:userId', protect, getParentByUserId);
+
 module.exports = router;

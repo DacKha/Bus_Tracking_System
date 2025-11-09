@@ -2,6 +2,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -26,12 +27,12 @@ export default function DriverLayout({
   };
 
   const navItems = [
-    { href: '/driver', label: 'Trang chu', icon: LayoutDashboard },
-    { href: '/driver/schedule', label: 'Lich trinh', icon: Calendar },
-    { href: '/driver/attendance', label: 'Diem danh', icon: CheckSquare },
-    { href: '/driver/students', label: 'Hoc sinh', icon: Users },
-    { href: '/driver/messages', label: 'Tin nhan', icon: MessageSquare },
-    { href: '/driver/incidents', label: 'Su co', icon: AlertTriangle },
+    { href: '/driver', label: 'Trang chủ', icon: LayoutDashboard },
+    { href: '/driver/schedule', label: 'Lịch trình', icon: Calendar },
+    { href: '/driver/attendance', label: 'Điểm danh', icon: CheckSquare },
+    { href: '/driver/students', label: 'Học sinh', icon: Users },
+    { href: '/driver/messages', label: 'Tin nhắn', icon: MessageSquare },
+    { href: '/driver/incidents', label: 'Sự cố', icon: AlertTriangle },
   ];
 
   return (
@@ -45,11 +46,13 @@ export default function DriverLayout({
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-gray-900">Smart School Bus</h1>
-                <p className="text-xs text-gray-500">Tai xe</p>
+                <p className="text-xs text-gray-500">Tài xế</p>
               </div>
             </Link>
 
             <div className="flex items-center gap-4">
+              <NotificationBell />
+              
               <div className="hidden sm:flex flex-col items-end">
                 <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
@@ -60,7 +63,7 @@ export default function DriverLayout({
                 className="px-4 py-2 bg-orange-600 text-white hover:bg-orange-700 rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
               >
                 <LogOut size={16} />
-                <span className="hidden sm:inline">Dang xuat</span>
+                <span className="hidden sm:inline">Đăng xuất</span>
               </button>
             </div>
           </div>

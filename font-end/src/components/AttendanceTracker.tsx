@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import { Check, X, Clock, User, MapPin, Phone } from 'lucide-react';
 
 interface Student {
@@ -67,35 +68,25 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     try {
       setLoading(student.student_id);
 
-      const response = await fetch(`/api/schedules/${scheduleId}/students/${student.student_id}/pickup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      await api.post(`/api/schedules/${scheduleId}/students/${student.student_id}/pickup`);
+
+      const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      setStudents(prev =>
+        prev.map(s =>
+          s.student_id === student.student_id
+            ? { ...s, pickup_status: 'picked_up', pickup_time: now }
+            : s
+        )
+      );
+
+      sendAttendanceUpdate({
+        schedule_id: scheduleId,
+        student_id: student.student_id,
+        attendance_type: 'pickup',
+        status: 'picked_up'
       });
 
-      if (response.ok) {
-        // Update local state
-        const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        setStudents(prev =>
-          prev.map(s =>
-            s.student_id === student.student_id
-              ? { ...s, pickup_status: 'picked_up', pickup_time: now }
-              : s
-          )
-        );
-
-        // Emit Socket.IO event
-        sendAttendanceUpdate({
-          schedule_id: scheduleId,
-          student_id: student.student_id,
-          attendance_type: 'pickup',
-          status: 'picked_up'
-        });
-
-        onAttendanceUpdate();
-      }
+      onAttendanceUpdate();
     } catch (error) {
       console.error('Error marking pickup:', error);
       alert('Không thể đánh dấu đón học sinh');
@@ -108,35 +99,25 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({
     try {
       setLoading(student.student_id);
 
-      const response = await fetch(`/api/schedules/${scheduleId}/students/${student.student_id}/dropoff`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      await api.post(`/api/schedules/${scheduleId}/students/${student.student_id}/dropoff`);
+
+      const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      setStudents(prev =>
+        prev.map(s =>
+          s.student_id === student.student_id
+            ? { ...s, dropoff_status: 'dropped_off', dropoff_time: now }
+            : s
+        )
+      );
+
+      sendAttendanceUpdate({
+        schedule_id: scheduleId,
+        student_id: student.student_id,
+        attendance_type: 'dropoff',
+        status: 'dropped_off'
       });
 
-      if (response.ok) {
-        // Update local state
-        const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        setStudents(prev =>
-          prev.map(s =>
-            s.student_id === student.student_id
-              ? { ...s, dropoff_status: 'dropped_off', dropoff_time: now }
-              : s
-          )
-        );
-
-        // Emit Socket.IO event
-        sendAttendanceUpdate({
-          schedule_id: scheduleId,
-          student_id: student.student_id,
-          attendance_type: 'dropoff',
-          status: 'dropped_off'
-        });
-
-        onAttendanceUpdate();
-      }
+      onAttendanceUpdate();
     } catch (error) {
       console.error('Error marking dropoff:', error);
       alert('Không thể đánh dấu trả học sinh');

@@ -4,8 +4,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '@/lib/authService';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/utils/logger';
 
-// Interface cho Nguoi dung
 interface User {
   user_id: number;
   email: string;
@@ -15,7 +15,6 @@ interface User {
   avatar_url?: string;
 }
 
-// Interface cho AuthContext
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -25,17 +24,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
 }
 
-// Tao Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider Component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Load user tu localStorage khi component mount
   useEffect(() => {
     const loadUser = () => {
       try {
@@ -47,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setToken(storedToken);
         }
       } catch (error) {
-        console.error('Loi khi load user:', error);
+        logger.error('Error loading user:', error);
       } finally {
         setLoading(false);
       }
@@ -56,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, []);
 
-  // Ham login
   const login = async (email: string, password: string) => {
     try {
       const response = await authService.login(email, password);
@@ -64,15 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.success) {
         const { user: userData, token: userToken } = response.data;
 
-        // Luu vao localStorage
         localStorage.setItem('token', userToken);
         localStorage.setItem('user', JSON.stringify(userData));
 
-        // Cap nhat state
         setUser(userData);
         setToken(userToken);
 
-        // Redirect dua vao user_type
         if (userData.user_type === 'admin') {
           router.push('/admin');
         } else if (userData.user_type === 'driver') {
@@ -82,12 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (error: any) {
-      console.error('Loi dang nhap:', error);
-      throw new Error(error.response?.data?.error || 'Dang nhap that bai');
+      logger.error('Login error:', error);
+      throw new Error(error.response?.data?.error || 'Login failed');
     }
   };
 
-  // Ham dang xuat
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -107,13 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook de su dung AuthContext
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth phai duoc su dung trong AuthProvider');
+    throw new Error('useAuth phải được sử dụng trong AuthProvider');
   }
   return context;
 }
-
-

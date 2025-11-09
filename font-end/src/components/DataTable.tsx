@@ -2,6 +2,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 export interface Column<T> {
   key: string;
@@ -45,8 +46,12 @@ export default function DataTable<T extends Record<string, any>>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg">
-        <p className="text-gray-500">Không có dữ liệu</p>
+      <div className="bg-white rounded-lg border border-gray-200">
+        <EmptyState
+          title="Không có dữ liệu"
+          description="Chưa có dữ liệu để hiển thị. Thêm mới để bắt đầu."
+          type="default"
+        />
       </div>
     );
   }

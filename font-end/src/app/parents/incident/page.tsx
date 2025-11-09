@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { LoadingOverlay } from '@/components/Loading';
 import { incidentService } from '@/lib/incidentService';
+import api from '@/lib/api';
 import {
   AlertTriangle,
   Send,
@@ -78,7 +79,9 @@ function IncidentContent() {
 
   const loadSchedules = async () => {
     try {
-      setSchedules([]);
+      const response = await api.get('/api/parents/me/schedules/today');
+      const schedulesData = response.data.data || response.data || [];
+      setSchedules(schedulesData);
     } catch (error) {
       console.error('Error loading schedules:', error);
       setSchedules([]);
@@ -87,7 +90,9 @@ function IncidentContent() {
 
   const loadIncidents = async () => {
     try {
-      setIncidents([]);
+      const response = await api.get('/api/incidents');
+      const incidentsData = response.data.data || response.data || [];
+      setIncidents(incidentsData);
     } catch (error) {
       console.error('Error loading incidents:', error);
       setIncidents([]);

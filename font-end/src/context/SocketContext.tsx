@@ -3,6 +3,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { logger } from '@/utils/logger';
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
 
 interface LocationUpdate {
   schedule_id: number;
@@ -59,30 +62,24 @@ interface SocketContextType {
   socket: Socket | null;
   connected: boolean;
   
-  // Location tracking
   joinSchedule: (scheduleId: number) => void;
   leaveSchedule: (scheduleId: number) => void;
   sendLocationUpdate: (data: Omit<LocationUpdate, 'timestamp' | 'driver_name'>) => void;
   onLocationUpdate: (callback: (data: LocationUpdate) => void) => (() => void) | void;
   
-  // Notifications
   onNewNotification: (callback: (data: NotificationData) => void) => (() => void) | void;
   
-  // Messages
   joinConversation: (conversationId: number) => void;
   leaveConversation: (conversationId: number) => void;
   sendMessage: (conversationId: number, messageText: string) => void;
   onNewMessage: (callback: (data: MessageData) => void) => (() => void) | void;
   
-  // Attendance
   sendAttendanceUpdate: (data: Omit<AttendanceUpdate, 'timestamp' | 'driver_name'>) => void;
   onAttendanceUpdate: (callback: (data: AttendanceUpdate) => void) => (() => void) | void;
   
-  // Schedule status
   sendScheduleStatusUpdate: (scheduleId: number, status: string) => void;
   onScheduleStatusUpdate: (callback: (data: ScheduleStatusUpdate) => void) => (() => void) | void;
   
-  // Incidents
   reportIncident: (data: { incident_id: number; schedule_id: number; incident_type: string }) => void;
   onIncidentAlert: (callback: (data: IncidentAlert) => void) => (() => void) | void;
 }
@@ -116,8 +113,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       return;
     }
 
-    const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
     const newSocket = io(SOCKET_URL, {
       auth: {
         token: token
@@ -148,12 +143,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, [token, user]);
 
-  // ==================== LOCATION TRACKING ====================
-
   const joinSchedule = useCallback((scheduleId: number) => {
     if (socket?.connected) {
       socket.emit('join-schedule', { schedule_id: scheduleId });
-      console.log(`🚌 Joined schedule room: ${scheduleId}`);
+      logger.debug(`Joined schedule room: ${scheduleId}`);
     }
   }, [socket]);
 
@@ -174,13 +167,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     socket.on('location-updated', callback);
 
-    // Return cleanup function
     return () => {
       socket.off('location-updated', callback);
     };
   }, [socket]);
-
-  // ==================== NOTIFICATIONS ====================
 
   const onNewNotification = useCallback((callback: (data: NotificationData) => void) => {
     if (!socket) return;
@@ -192,19 +182,17 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, [socket]);
 
-  // ==================== MESSAGES ====================
-
   const joinConversation = useCallback((conversationId: number) => {
     if (socket?.connected) {
       socket.emit('join-conversation', { conversation_id: conversationId });
-      console.log(`💬 Joined conversation: ${conversationId}`);
+      logger.debug(`Joined conversation: ${conversationId}`);
     }
   }, [socket]);
 
   const leaveConversation = useCallback((conversationId: number) => {
     if (socket?.connected) {
       socket.emit('leave-conversation', { conversation_id: conversationId });
-      console.log(`💬 Left conversation: ${conversationId}`);
+      logger.debug(`Left conversation: ${conversationId}`);
     }
   }, [socket]);
 
@@ -227,8 +215,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, [socket]);
 
-  // ==================== ATTENDANCE ====================
-
   const sendAttendanceUpdate = useCallback((data: Omit<AttendanceUpdate, 'timestamp' | 'driver_name'>) => {
     if (socket?.connected) {
       socket.emit('student-attendance', data);
@@ -244,8 +230,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socket.off('attendance-update', callback);
     };
   }, [socket]);
-
-  // ==================== SCHEDULE STATUS ====================
 
   const sendScheduleStatusUpdate = useCallback((scheduleId: number, status: string) => {
     if (socket?.connected) {
@@ -265,8 +249,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       socket.off('schedule-status-changed', callback);
     };
   }, [socket]);
-
-  // ==================== INCIDENTS ====================
 
   const reportIncident = useCallback((data: { incident_id: number; schedule_id: number; incident_type: string }) => {
     if (socket?.connected) {

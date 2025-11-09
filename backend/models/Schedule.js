@@ -449,6 +449,79 @@ class Schedule {
     return rows;
   }
 
+  /**
+   * Lấy lịch trình hôm nay của học sinh
+   */
+  static async getTodayByStudentId(studentId) {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const [rows] = await pool.query(
+      `SELECT s.*,
+              r.route_name, r.route_code,
+              b.bus_number, b.license_plate,
+              u.full_name as driver_name, u.phone as driver_phone,
+              ss.schedule_student_id, ss.pickup_status, ss.dropoff_status,
+              ss.pickup_time, ss.dropoff_time
+       FROM schedules s
+       JOIN routes r ON s.route_id = r.route_id
+       JOIN buses b ON s.bus_id = b.bus_id
+       JOIN drivers d ON s.driver_id = d.driver_id
+       JOIN users u ON d.user_id = u.user_id
+       JOIN schedule_students ss ON s.schedule_id = ss.schedule_id
+       WHERE ss.student_id = ? AND s.schedule_date = ?
+       ORDER BY s.start_time`,
+      [studentId, today]
+    );
+    return rows;
+  }
+
+  /**
+   * Lấy lịch trình của học sinh theo filters
+   */
+  static async getByStudentId(studentId, filters = {}) {
+    const { page = 1, limit = 10 } = filters;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    let query = `
+      SELECT s.*,
+             r.route_name, r.route_code,
+             b.bus_number, b.license_plate,
+             u.full_name as driver_name,
+             ss.schedule_student_id, ss.pickup_status, ss.dropoff_status,
+             ss.pickup_time, ss.dropoff_time
+      FROM schedules s
+      JOIN routes r ON s.route_id = r.route_id
+      JOIN buses b ON s.bus_id = b.bus_id
+      JOIN drivers d ON s.driver_id = d.driver_id
+      JOIN users u ON d.user_id = u.user_id
+      JOIN schedule_students ss ON s.schedule_id = ss.schedule_id
+      WHERE ss.student_id = ?
+      ORDER BY s.schedule_date DESC, s.start_time DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const [rows] = await pool.query(query, [studentId, parseInt(limit), offset]);
+
+    const [countResult] = await pool.query(
+      `SELECT COUNT(*) as total
+       FROM schedule_students ss
+       WHERE ss.student_id = ?`,
+      [studentId]
+    );
+
+    const total = countResult[0].total;
+
+    return {
+      schedules: rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: total,
+        totalPages: Math.ceil(total / parseInt(limit))
+      }
+    };
+  }
+
 }
 
 module.exports = Schedule;

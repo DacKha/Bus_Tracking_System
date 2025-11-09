@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 
 interface MessageInputProps {
   otherUserId: number;
@@ -18,39 +19,22 @@ const MessageInput: React.FC<MessageInputProps> = ({ otherUserId, onMessageSent 
     setSending(true);
 
     try {
-      const token = localStorage.getItem('token');
-
-      // Persist message via API
-      const res = await fetch('http://localhost:5000/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ receiver_id: otherUserId, content: text })
+      const res = await api.post('/api/messages', {
+        receiver_id: otherUserId,
+        content: text
       });
 
-      if (res.ok) {
-        const saved = await res.json();
-
-        // Emit socket message to conversation room for real-time
-        try {
-          sendMessage(otherUserId, text);
-        } catch (err) {
-          // socket might fail; ignore to avoid blocking
-          console.warn('Socket send failed', err);
-        }
-
-        setText('');
-        onMessageSent && onMessageSent(saved.data || saved);
-      } else {
-        const err = await res.json();
-        console.error('Send message failed', err);
-        alert(err.message || 'Gửi tin nhắn thất bại');
+      try {
+        sendMessage(otherUserId, text);
+      } catch (err) {
+        console.warn('Socket send failed', err);
       }
-    } catch (error) {
+
+      setText('');
+      onMessageSent && onMessageSent(res.data.data || res.data);
+    } catch (error: any) {
       console.error('Error sending message', error);
-      alert('Có lỗi khi gửi tin nhắn');
+      alert(error.response?.data?.message || 'Có lỗi khi gửi tin nhắn');
     } finally {
       setSending(false);
     }

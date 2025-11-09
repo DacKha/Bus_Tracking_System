@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import IncidentReportForm from '@/components/IncidentReportForm';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import { AlertTriangle, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 
 interface Incident {
@@ -51,15 +52,8 @@ const DriverIncidentsPage: React.FC = () => {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/incidents', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIncidents(data.data || []);
-      }
+      const response = await api.get('/api/incidents');
+      setIncidents(response.data.data || []);
     } catch (error) {
       console.error('Error fetching incidents:', error);
     } finally {
@@ -69,16 +63,9 @@ const DriverIncidentsPage: React.FC = () => {
 
   const fetchTodaySchedules = async () => {
     try {
-      const token = localStorage.getItem('token');
       const today = new Date().toISOString().split('T')[0];
-      const response = await fetch(`http://localhost:5000/api/schedules?date=${today}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSchedules(data.data || []);
-      }
+      const response = await api.get(`/api/schedules?date=${today}`);
+      setSchedules(response.data.data || []);
     } catch (error) {
       console.error('Error fetching schedules:', error);
     }

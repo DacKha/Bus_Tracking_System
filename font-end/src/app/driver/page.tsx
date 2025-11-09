@@ -42,9 +42,9 @@ function DriverDashboardContent() {
 
       if (!user?.user_id) return;
 
-      // Lay thong tin driver tu user_id
+      // Lấy thông tin driver từ user_id
       const driversResponse = await driverService.getDrivers(1, 100);
-      // API tra ve: { success, message, data: [...], pagination: {...} }
+      // API trả về: { success, message, data: [...], pagination: {...} }
       const driversData = Array.isArray(driversResponse.data) 
         ? driversResponse.data 
         : [];
@@ -53,17 +53,17 @@ function DriverDashboardContent() {
       if (currentDriver) {
         setDriverInfo(currentDriver);
 
-        // Lay lich trinh hom nay cua driver
+        // Lấy lịch trình hôm nay của driver
         const today = new Date().toISOString().split('T')[0];
         const schedulesResponse = await driverService.getDriverSchedules(currentDriver.driver_id, today);
-        // API tra ve: { success, message, data: [...] }
+        // API trả về: { success, message, data: [...] }
         const schedulesData = Array.isArray(schedulesResponse.data)
           ? schedulesResponse.data
           : [];
         setTodaySchedules(schedulesData);
       }
     } catch (err: any) {
-      setError('Khong the tai du lieu dashboard');
+      setError('Không thể tải dữ liệu dashboard');
       console.error('Error loading dashboard:', err);
     } finally {
       setLoading(false);

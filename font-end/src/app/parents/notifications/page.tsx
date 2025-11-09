@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { notificationService } from '@/lib/notificationService';
 import {
   Bell,
   AlertTriangle,
@@ -11,13 +12,18 @@ import {
   Clock,
   Trash2,
   RefreshCw,
+  Info,
+  XCircle,
+  Check,
+  CheckCheck
 } from 'lucide-react';
 
 interface Notification {
   notification_id: number;
+  user_id: number;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  notification_type: 'info' | 'success' | 'warning' | 'error' | 'alert';
   is_read: boolean;
   created_at: string;
 }
@@ -35,12 +41,17 @@ function NotificationsContent() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Load notifications
   const loadNotifications = async () => {
     try {
       setLoading(true);
-      setNotifications([]);
+      const response = await notificationService.getNotifications(1, 20);
+      const data = response.data;
+
+      let notifs = data.notifications || [];
+      setNotifications(notifs);
+      setUnreadCount(data.unread_count || 0);
     } catch (error) {
       console.error('Error loading notifications:', error);
       setNotifications([]);
@@ -53,16 +64,39 @@ function NotificationsContent() {
     loadNotifications();
   }, []);
 
-  const handleDeleteNotification = (id: number) => {
-    setNotifications(notifications.filter(n => n.notification_id !== id));
+  const handleDeleteNotification = async (id: number) => {
+    if (!confirm('Bạn có chắc muốn xóa thông báo này?')) return;
+
+    try {
+      await notificationService.deleteNotification(id);
+      setNotifications(notifications.filter(n => n.notification_id !== id));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications(
-      notifications.map(n =>
-        n.notification_id === id ? { ...n, is_read: true } : n
-      )
-    );
+  const handleMarkAsRead = async (id: number) => {
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications(
+        notifications.map(n =>
+          n.notification_id === id ? { ...n, is_read: true } : n
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(notifications.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
   };
 
   const filteredNotifications =
@@ -77,9 +111,9 @@ function NotificationsContent() {
       case 'warning':
         return <AlertTriangle className="text-yellow-600" size={24} />;
       case 'error':
-        return <AlertTriangle className="text-red-600" size={24} />;
+        return <XCircle className="text-red-600" size={24} />;
       default:
-        return <Bell className="text-blue-600" size={24} />;
+        return <Info className="text-blue-600" size={24} />;
     }
   };
 
@@ -105,16 +139,32 @@ function NotificationsContent() {
           <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Thông Báo</h1>
           <p className="text-gray-600 mt-1">
             {filteredNotifications.length} thông báo
+            {unreadCount > 0 && (
+              <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                {unreadCount} chưa đọc
+              </span>
+            )}
           </p>
         </div>
-        <button
-          onClick={loadNotifications}
-          disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
-        >
-          <RefreshCw size={16} />
-          Làm mới
-        </button>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
+            >
+              <CheckCheck size={18} />
+              Đánh dấu tất cả
+            </button>
+          )}
+          <button
+            onClick={loadNotifications}
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
+          >
+            <RefreshCw size={16} />
+            Làm mới
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -153,12 +203,12 @@ function NotificationsContent() {
           {filteredNotifications.map((notification) => (
             <div
               key={notification.notification_id}
-              className={`${getNotificationBg(notification.type, notification.is_read)} border-l-4 rounded-lg p-4 flex items-start gap-4 ${
+              className={`${getNotificationBg(notification.notification_type, notification.is_read)} border-l-4 rounded-lg p-4 flex items-start gap-4 ${
                 !notification.is_read ? 'border-l-green-500 shadow-sm' : 'border-l-gray-300'
               }`}
             >
               <div className="flex-shrink-0 pt-1">
-                {getNotificationIcon(notification.type)}
+                {getNotificationIcon(notification.notification_type)}
               </div>
 
               <div className="flex-1 min-w-0">

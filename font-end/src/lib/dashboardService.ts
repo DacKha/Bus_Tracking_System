@@ -38,17 +38,17 @@ const extractList = (payload: any) => {
 
 export const dashboardService = {
   /**
-   * Lay thong ke tong quan cho dashboard
-   * Su dung API endpoint moi thay vi goi nhieu APIs rieng le
+   * Lấy thống kê tổng quan cho dashboard
+   * Sử dụng API endpoint mới thay vì gọi nhiều APIs riêng lẻ
    */
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      // Goi API dashboard endpoint moi
+      // Gọi API dashboard endpoint mới
       const response = await api.get<{ success: boolean; message: string; data: DashboardStats }>('/api/dashboard/stats');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      // Return zeros neu co loi
+      // Return zeros nếu có lỗi
       return {
         totalDrivers: 0,
         activeDrivers: 0,

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
 import {
   LayoutDashboard,
   Users,
@@ -50,15 +51,15 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { href: '/admin', label: 'Trang chu', icon: LayoutDashboard },
-    { href: '/admin/users', label: 'Nguoi dung', icon: Users },
-    { href: '/admin/driver', label: 'Tai xe', icon: UserCog },
-    { href: '/admin/student', label: 'Hoc sinh', icon: GraduationCap },
+    { href: '/admin', label: 'Trang chủ', icon: LayoutDashboard },
+    { href: '/admin/users', label: 'Người dùng', icon: Users },
+    { href: '/admin/driver', label: 'Tài xế', icon: UserCog },
+    { href: '/admin/student', label: 'Học sinh', icon: GraduationCap },
     { href: '/admin/bus', label: 'Xe bus', icon: Bus },
-    { href: '/admin/route', label: 'Tuyen duong', icon: MapPin },
-    { href: '/admin/schedule', label: 'Lich trinh', icon: Calendar },
-    { href: '/admin/messages', label: 'Tin nhan', icon: MessageSquare },
-    { href: '/admin/incidents', label: 'Su co', icon: AlertTriangle },
+    { href: '/admin/route', label: 'Tuyến đường', icon: MapPin },
+    { href: '/admin/schedule', label: 'Lịch trình', icon: Calendar },
+    { href: '/admin/messages', label: 'Tin nhắn', icon: MessageSquare },
+    { href: '/admin/incidents', label: 'Sự cố', icon: AlertTriangle },
   ];
 
   if (loading) {
@@ -66,7 +67,7 @@ export default function AdminLayout({
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Dang tai...</p>
+          <p className="text-gray-600">Đang tải...</p>
         </div>
       </div>
     );
@@ -97,6 +98,8 @@ export default function AdminLayout({
             </div>
 
             <div className="flex items-center gap-4">
+              <NotificationBell />
+              
               <div className="hidden sm:flex flex-col items-end">
                 <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
@@ -107,7 +110,7 @@ export default function AdminLayout({
                 className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium text-sm flex items-center gap-2"
               >
                 <LogOut size={16} />
-                <span className="hidden sm:inline">Dang xuat</span>
+                <span className="hidden sm:inline">Đăng xuất</span>
               </button>
             </div>
           </div>

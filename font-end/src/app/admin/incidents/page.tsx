@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useSocket } from '@/context/SocketContext';
+import api from '@/lib/api';
 import { AlertTriangle, CheckCircle, Clock, XCircle, Filter, TrendingUp } from 'lucide-react';
 
 interface Incident {
@@ -70,19 +71,12 @@ function IncidentsContent() {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const params = new URLSearchParams();
       if (filter.status) params.append('status', filter.status);
       if (filter.severity) params.append('severity', filter.severity);
 
-      const response = await fetch(`http://localhost:5000/api/incidents?${params}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIncidents(data.data || []);
-      }
+      const response = await api.get(`/api/incidents?${params}`);
+      setIncidents(response.data.data || []);
     } catch (error) {
       console.error('Error fetching incidents:', error);
     } finally {
@@ -92,14 +86,10 @@ function IncidentsContent() {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/incidents/stats', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await api.get('/api/incidents/stats');
 
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
+      if (response.data) {
+        setStats(response.data.data);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
